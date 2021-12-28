@@ -2,7 +2,7 @@
     <div class="page-search">
         <div class="columns is-multiline">
             <div class="column is-12">
-                <h1 class="is-size-2 ">Search</h1>
+                <h1 class="title ">Search</h1>
                 <h2 class="is-size-5 ">Results for: "{{query}}"</h2>
             </div>
             <ProductBox  
