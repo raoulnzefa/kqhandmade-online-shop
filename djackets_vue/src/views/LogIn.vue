@@ -29,7 +29,7 @@
             </div>
           </div>
           <hr />
-          Or <router-link to="/log-in">click here </router-link> to Sign up!
+          Or <router-link to="/sign-up">click here </router-link> to Sign up!
         </form>
       </div>
     </div>
@@ -67,7 +67,7 @@ export default {
               const token = response.data.auth_token
 
               this.$store.commit('setToken', token)
-              axios.defaults.headers.common['Authorization'] = "Token" + token
+              axios.defaults.headers.common['Authorization'] = "Token " + token
 
               localStorage.setItem('token', token)
 

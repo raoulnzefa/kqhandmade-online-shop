@@ -24,7 +24,7 @@
           </tbody>
       </table>
 
-      <p v-else>Start adding to your cart...</p>
+      <p v-else>You don't have products in your cart</p>
 
       
       
