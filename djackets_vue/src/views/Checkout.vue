@@ -122,7 +122,7 @@ export default {
       cart: {
         items: [],
       },
-      stripte: {},
+      stripe: {},
       card: {},
       first_name: "",
       last_name: "",
@@ -138,6 +138,14 @@ export default {
     document.title = "Checkout | KQ HandMade";
 
     this.cart = this.$store.state.cart;
+
+    if (this.cartTotalLength > 0) {
+        this.stripe = Stripe('pk_test_51KBxIaFgbWokh1KI4HN46BqXIlDHV9YEyHfYyy1t4lE8WineTooHHvGklb1cIDyblpjt5QDUt43qhdxpybbkJEsr00oPhejM4A')
+        const elements = this.stripe.elements();
+        this.card = elements.create('card', { hidePostalCode: true})
+
+        this.card.mount('#card-element')
+    }
   },
   methods: {
     getItemTotal(item) {
@@ -167,6 +175,62 @@ export default {
         if(this.place === '') {
             this.errors.push("please enter place")
         }
+        if (!this.errors.length) {
+            this.$store.commit('setIsLoading', true)
+
+            this.stripe.createToken(this.card).then(result =>{
+                if (result.error) {
+                    this.$store.commit('setIsLoading', false)
+
+                    this.errors.push('Something went wrong with Stripe, Please try again')
+
+                    console.log(result.error.message)
+                } else { 
+                    this.stripeTokenHandler(result.token)
+                }
+            })
+        }
+
+    },
+    async stripeTokenHandler(token) {
+        const items = []
+
+        for(let i = 0; i < this.cart.items.length; i++) {
+            const item = this.cart.items[i]
+            const obj = {
+                product: item.product.id,
+                quantity: item.quantity,
+                price: item.product.price * item.quantity
+            }
+            items.push(obj)
+        }
+        const data = {
+            'first_name': this.first_name,
+            'last_name': this.last_name,
+            'email': this.email,
+            'address': this.address,
+            'zipcode': this.zipcode,
+            'place': this.place,
+            'phone': this.phone,
+            'items': items,
+            'stripe_token': token.id
+
+        }
+        console.log(data)
+
+        await axios
+            .post('/api/v1/checkout/', data)
+            .then(response =>{
+                this.$store.commit('clearCart')
+                this.$store.commit('initializeStore')
+                this.$router.push('/cart/success') 
+            })
+            .catch(error =>{
+                this.errors.push('Something went wrong, please try again')
+
+                console.log(error)
+            })
+            this.$store.commit('setIsLoading', false)
 
     }
   },
